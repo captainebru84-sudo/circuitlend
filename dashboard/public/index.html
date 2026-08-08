@@ -104,6 +104,8 @@
 <script>
 const $ = (id) => document.getElementById(id);
 const EXPLORER = 'https://testnet.monadexplorer.com/tx/';
+// Deployed console gates writes; pass ?token=... to drive it live.
+const DEMO_TOKEN = new URLSearchParams(location.search).get('token') || '';
 let remaining = null, powered = false, busy = false;
 
 function toast(msg, ms = 5000) {
@@ -181,7 +183,8 @@ async function act(type) {
   toast(type + ' — sending…', 60000);
   try {
     const r = await (await fetch('/api/action', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-demo-token': DEMO_TOKEN },
       body: JSON.stringify({ type, loanId: Number($('loanId').value) })
     })).json();
     toast(r.error ? type + ' failed: ' + r.error : type + ' ✓ ' + JSON.stringify(r).slice(0, 140));

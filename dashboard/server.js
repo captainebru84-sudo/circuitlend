@@ -135,7 +135,14 @@ app.get('/api/receipts', async (req, res) => {
   }
 });
 
+// State is public; mutations are not. The deployed console runs on testnet keys
+// with no login, so DEMO_ACTION_TOKEN gates the write endpoints to stop a
+// passer-by draining the demo wallets. Unset locally, actions stay open.
 app.post('/api/action', async (req, res) => {
+  const token = process.env.DEMO_ACTION_TOKEN;
+  if (token && req.get('x-demo-token') !== token) {
+    return res.status(403).json({ error: 'Read-only demo. Actions require x-demo-token.' });
+  }
   try {
     const { type, loanId = 1 } = req.body;
     const dev = devWallet();
