@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CircuitLend — Lender Console</title>
+<style>
+  :root {
+    --bg: #0b0f14; --panel: #121821; --edge: #1e2938; --text: #dbe4ee; --dim: #7d8fa5;
+    --on: #2ee06a; --off: #ff4757; --amber: #ffb347; --link: #5aa9ff;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 14px/1.5 'Segoe UI', system-ui, sans-serif; padding: 20px; }
+  h1 { font-size: 20px; letter-spacing: .5px; }
+  h1 .zap { color: var(--amber); }
+  .sub { color: var(--dim); font-size: 12px; margin-bottom: 18px; }
+  .grid { display: grid; grid-template-columns: 340px 1fr 1fr; gap: 14px; max-width: 1200px; }
+  .card { background: var(--panel); border: 1px solid var(--edge); border-radius: 10px; padding: 16px; }
+  .card h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--dim); margin-bottom: 12px; }
+  .power { grid-row: span 2; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .bulb { width: 120px; height: 120px; border-radius: 50%; margin: 14px 0; transition: all .4s;
+          display: flex; align-items: center; justify-content: center; font-size: 50px; }
+  .bulb.on  { background: radial-gradient(circle, rgba(46,224,106,.35), transparent 70%); box-shadow: 0 0 60px rgba(46,224,106,.45); }
+  .bulb.off { background: radial-gradient(circle, rgba(255,71,87,.25), transparent 70%); box-shadow: 0 0 30px rgba(255,71,87,.3); filter: grayscale(.7); }
+  .pstate { font-size: 26px; font-weight: 700; }
+  .pstate.on { color: var(--on); } .pstate.off { color: var(--off); }
+  .count { font-size: 34px; font-variant-numeric: tabular-nums; margin-top: 8px; }
+  .count.low { color: var(--amber); } .count.zero { color: var(--off); }
+  .kv { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--edge); }
+  .kv:last-child { border-bottom: none; }
+  .kv .k { color: var(--dim); }
+  .badge { padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .b-ok { background: rgba(46,224,106,.12); color: var(--on); }
+  .b-bad { background: rgba(255,71,87,.15); color: var(--off); }
+  .b-warn { background: rgba(255,179,71,.15); color: var(--amber); }
+  button { background: #1b2634; color: var(--text); border: 1px solid var(--edge); border-radius: 7px;
+           padding: 9px 14px; cursor: pointer; font-size: 13px; margin: 4px 4px 0 0; transition: background .15s; }
+  button:hover { background: #24334a; }
+  button.danger { border-color: rgba(255,71,87,.4); color: var(--off); }
+  button.good { border-color: rgba(46,224,106,.4); color: var(--on); }
+  button:disabled { opacity: .4; cursor: default; }
+  .receipts { grid-column: 1 / -1; max-height: 320px; overflow-y: auto; }
+  .rc { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--edge); font-size: 13px; align-items: baseline; }
+  .rc .act { min-width: 190px; font-weight: 600; }
+  .rc .detail { color: var(--dim); flex: 1; }
+  .rc a { color: var(--link); text-decoration: none; font-size: 12px; }
+  .addr { font-family: Consolas, monospace; font-size: 11px; color: var(--dim); }
+  #toast { position: fixed; bottom: 20px; right: 20px; background: #1b2634; border: 1px solid var(--edge);
+           border-radius: 8px; padding: 12px 16px; display: none; max-width: 420px; font-size: 13px; }
+  .loanpick { margin-left: 12px; font-size: 12px; color: var(--dim); }
+  .loanpick input { width: 50px; background: var(--bg); color: var(--text); border: 1px solid var(--edge); border-radius: 5px; padding: 3px 6px; }
+</style>
+</head>
+<body>
+  <h1><span class="zap">&#9889;</span> CircuitLend <span style="color:var(--dim);font-weight:400">— Lender Console</span>
+    <span class="loanpick">loan #<input id="loanId" type="number" value="1" min="1"></span>
+  </h1>
+  <div class="sub">Hardware-enforced RWA lending on Monad testnet · the device polls the chain itself — this console never talks to it</div>
+
+  <div class="grid">
+    <div class="card power">
+      <h2>Device Power (on-chain isPowered)</h2>
+      <div id="bulb" class="bulb off">&#128161;</div>
+      <div id="pstate" class="pstate off">—</div>
+      <div id="count" class="count">--:--</div>
+      <div style="color:var(--dim);font-size:12px">lease + grace remaining</div>
+    </div>
+
+    <div class="card">
+      <h2>Loan</h2>
+      <div id="loan"></div>
+    </div>
+
+    <div class="card">
+      <h2>Borrower A-Pass (CVI)</h2>
+      <div id="apass"></div>
+      <div style="margin-top:10px">
+        <button class="danger" onclick="act('freeze')">Freeze A-Pass + latch</button>
+        <button class="good" onclick="act('restore')">Reinstate (+120s lease)</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Payments</h2>
+      <div id="balances"></div>
+      <div style="margin-top:10px">
+        <button class="good" onclick="act('repay')">Record payment (10 CLUSD)</button>
+        <button class="danger" onclick="act('enforce')">Latch lease default</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Pool Compliance (CCP validator)</h2>
+      <div id="validator"></div>
+    </div>
+
+    <div class="card receipts">
+      <h2>Compliance Receipts (on-chain audit trail)</h2>
+      <div id="receipts">loading…</div>
+    </div>
+  </div>
+  <div id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const EXPLORER = 'https://testnet.monadexplorer.com/tx/';
+let remaining = null, powered = false, busy = false;
+
+function toast(msg, ms = 5000) {
+  const t = $('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', ms);
+}
+const short = (a) => a ? a.slice(0, 8) + '…' + a.slice(-6) : '—';
+const kv = (k, v) => `<div class="kv"><span class="k">${k}</span><span>${v}</span></div>`;
+
+async function refresh() {
+  try {
+    const s = await (await fetch('/api/state?loanId=' + $('loanId').value)).json();
+    if (s.error) { toast('state: ' + s.error); return; }
+    powered = s.isPowered; remaining = s.leaseRemaining;
+
+    $('bulb').className = 'bulb ' + (powered ? 'on' : 'off');
+    $('pstate').className = 'pstate ' + (powered ? 'on' : 'off');
+    $('pstate').textContent = powered ? 'POWER ON' : 'POWER CUT';
+
+    const l = s.loan;
+    $('loan').innerHTML =
+      kv('borrower', `<span class="addr">${short(l.borrower)}</span>`) +
+      kv('outstanding', `${l.outstanding} / ${l.principal} CLUSD`) +
+      kv('installment', l.installment + ' CLUSD → +' + '120s lease') +
+      kv('collateral in custody', l.collateral + ' CLDT01') +
+      kv('lease expires', l.leaseExpiry ? new Date(l.leaseExpiry * 1000).toLocaleTimeString() + ' (+' + l.graceSeconds + 's grace)' : '—') +
+      kv('status', l.closed ? '<span class="badge b-ok">CLOSED — PAID OFF</span>'
+                 : l.enforced ? '<span class="badge b-bad">ENFORCED</span>'
+                 : '<span class="badge b-ok">ACTIVE</span>');
+
+    $('apass').innerHTML =
+      kv('wallet', `<span class="addr">${short(s.apass.address)}</span>`) +
+      kv('tier', s.apass.tier ?? '—') +
+      kv('status', s.apass.frozen ? '<span class="badge b-bad">FROZEN</span>' : '<span class="badge b-ok">ACTIVE</span>');
+
+    $('balances').innerHTML =
+      kv('borrower CLUSD', s.balances.borrowerCLUSD) +
+      kv('pool CLUSD', s.balances.poolCLUSD) +
+      kv('pool CLDT01 custody', s.balances.poolCLDT01);
+
+    const v = s.validator;
+    $('validator').innerHTML =
+      kv('pool', `<span class="addr">${short(s.addresses.pool)}</span>`) +
+      kv('borrower passes pool policy', v.valid ? '<span class="badge b-ok">VALID</span>' : '<span class="badge b-bad">BLOCKED</span>') +
+      kv('policy', 'min tier 30 · live-editable');
+  } catch (e) { /* poll again */ }
+}
+
+async function refreshReceipts() {
+  try {
+    const rs = await (await fetch('/api/receipts')).json();
+    if (rs.error) return;
+    $('receipts').innerHTML = rs.map(r =>
+      `<div class="rc">
+        <span class="act">${r.action}${r.loanId ? ' · #' + r.loanId : ''}</span>
+        <span class="detail">${r.detail || ''} — ${new Date(r.timestamp * 1000).toLocaleTimeString()} by <span class="addr">${short(r.actor)}</span></span>
+        <a href="${EXPLORER}${r.txHash}" target="_blank">tx ↗</a>
+      </div>`).join('') || '<span style="color:var(--dim)">no receipts yet</span>';
+  } catch (e) {}
+}
+
+function tick() {
+  if (remaining === null) return;
+  if (powered && remaining > 0) remaining--;
+  const m = Math.floor(remaining / 60), s = remaining % 60;
+  const el = $('count');
+  el.textContent = remaining <= 0 ? '00:00' : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className = 'count' + (remaining <= 0 ? ' zero' : remaining < 45 ? ' low' : '');
+}
+
+async function act(type) {
+  if (busy) return;
+  busy = true;
+  toast(type + ' — sending…', 60000);
+  try {
+    const r = await (await fetch('/api/action', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, loanId: Number($('loanId').value) })
+    })).json();
+    toast(r.error ? type + ' failed: ' + r.error : type + ' ✓ ' + JSON.stringify(r).slice(0, 140));
+  } catch (e) { toast(type + ' failed: ' + e.message); }
+  busy = false;
+  refresh(); refreshReceipts();
+}
+
+refresh(); refreshReceipts();
+setInterval(refresh, 3000);
+setInterval(refreshReceipts, 12000);
+setInterval(tick, 1000);
+</script>
+</body>
+</html>

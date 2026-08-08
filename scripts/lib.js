@@ -14,6 +14,7 @@ function devWallet() {
 const BORROWER_FILE = path.join(__dirname, '..', 'borrower.json'); // gitignored
 
 function borrowerWallet({ createIfMissing = false } = {}) {
+  if (process.env.BORROWER_KEY) return new ethers.Wallet(process.env.BORROWER_KEY, provider);
   if (fs.existsSync(BORROWER_FILE)) {
     const j = JSON.parse(fs.readFileSync(BORROWER_FILE, 'utf8'));
     return new ethers.Wallet(j.privateKey, provider);

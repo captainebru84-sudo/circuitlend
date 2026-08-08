@@ -2,7 +2,7 @@
 // borrower) is collateralized by its CLDT01 note; principal is disbursed in CLUSD.
 // Demo-friendly lease economics via CLI: node scripts/05_open_loan.js [leaseSecs] [graceSecs]
 //   default: 120s lease per 10-CLUSD installment, 60s grace — watchable on camera.
-const { ethers, devWallet, borrowerWallet, POOL_ABI, addr, U, fmt, writeReceipt } = require('./lib');
+const { ethers, devWallet, borrowerWallet, POOL_ABI, ERC20_ABI, addr, U, fmt, writeReceipt } = require('./lib');
 
 (async () => {
   const leaseSecs = Number(process.argv[2] || 120);
@@ -10,11 +10,28 @@ const { ethers, devWallet, borrowerWallet, POOL_ABI, addr, U, fmt, writeReceipt 
   const dev = devWallet();
   const borrower = borrowerWallet();
   const pool = new ethers.Contract(addr.pool(), POOL_ABI, dev);
+  const note = new ethers.Contract(addr.cldt01(), ERC20_ABI, dev);
+  const clusd = new ethers.Contract(addr.clusd(), ERC20_ABI, dev);
 
-  let tx = await pool.fund(U(100));
-  console.log('pool funded 100 CLUSD:', (await tx.wait()).hash);
+  // Self-sufficient for repeat demos: fresh device note + approvals each run.
+  if ((await note.balanceOf(borrower.address)) < U(1)) {
+    const t = await note.mint(borrower.address, U(1));
+    console.log('minted fresh CLDT01 device note -> borrower:', (await t.wait()).hash);
+  }
+  let t = await note.connect(borrower).approve(addr.pool(), U(1));
+  await t.wait();
+  t = await clusd.connect(borrower).approve(addr.pool(), U(1000));
+  await t.wait();
+  console.log('borrower approvals refreshed');
 
-  tx = await pool.openLoan(borrower.address, U(1), U(100), U(10), leaseSecs, graceSecs);
+  if ((await clusd.balanceOf(addr.pool())) < U(100)) {
+    t = await clusd.approve(addr.pool(), U(1000));
+    await t.wait();
+    t = await pool.fund(U(100));
+    console.log('pool funded 100 CLUSD:', (await t.wait()).hash);
+  }
+
+  const tx = await pool.openLoan(borrower.address, U(1), U(100), U(10), leaseSecs, graceSecs);
   const rc = await tx.wait();
   const loanId = await pool.loanCount();
   console.log(`loan #${loanId} opened:`, rc.hash);
