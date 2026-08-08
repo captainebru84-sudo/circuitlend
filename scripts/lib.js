@@ -6,6 +6,18 @@ const { ethers } = require('ethers');
 const RPC = process.env.MONAD_RPC || 'https://testnet-rpc.monad.xyz';
 const provider = new ethers.JsonRpcProvider(RPC);
 
+// Monad testnet pins base fee at 100 gwei and reserves against maxFeePerGas far
+// more aggressively than the tx's own gasLimit * maxFeePerGas. ethers defaults
+// maxFeePerGas to 2x base (202 gwei), which the node rejects as "Signer had
+// insufficient balance" even on a well-funded wallet. Quoting just above base
+// here makes every write in the project inherit a fee the node accepts.
+const baseFeeData = provider.getFeeData.bind(provider);
+provider.getFeeData = async () => {
+  const fee = await baseFeeData();
+  const base = fee.gasPrice ?? ethers.parseUnits('100', 'gwei');
+  return new ethers.FeeData(fee.gasPrice, (base * 115n) / 100n, ethers.parseUnits('1', 'gwei'));
+};
+
 function devWallet() {
   if (!process.env.DEV_WALLET_KEY) throw new Error('Set DEV_WALLET_KEY in .env');
   return new ethers.Wallet(process.env.DEV_WALLET_KEY, provider);
@@ -85,7 +97,25 @@ function writeReceipt(action, payload) {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// Monad reserves gasLimit * maxFeePerGas up front, so a wallet with enough
+// balance for the real cost can still be rejected. The node answers -32603
+// "Signer had insufficient balance", which ethers v6 cannot map to a known
+// error and reports as the useless "could not coalesce error".
+function rpcError(e) {
+  const nested = e?.error?.message || e?.info?.error?.message;
+  const coalesced = String(e?.message || '').match(/error=\{[^}]*"message":\s*"([^"]+)"/)?.[1];
+  return nested || coalesced || e?.shortMessage || e?.message || String(e);
+}
+
+// Monad reserves against maxFeePerGas, so a wallet with enough balance for the
+// real cost can still be rejected. Surfaced as a preflight warning in the console.
+async function gasHeadroom(address) {
+  const [bal, fee] = await Promise.all([provider.getBalance(address), provider.getFeeData()]);
+  const reserve = 400000n * fee.maxFeePerGas;
+  return { balance: ethers.formatEther(bal), reservePerTx: ethers.formatEther(reserve), low: bal < reserve * 3n };
+}
+
 module.exports = {
   ethers, provider, devWallet, borrowerWallet,
-  ERC20_ABI, POOL_ABI, MINTER_ROLE, addr, U, fmt, writeReceipt, sleep,
+  ERC20_ABI, POOL_ABI, MINTER_ROLE, addr, U, fmt, writeReceipt, sleep, rpcError, gasHeadroom,
 };

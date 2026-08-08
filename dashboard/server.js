@@ -4,7 +4,7 @@
 const express = require('express');
 const path = require('path');
 const { apass, validator } = require('../sdk');
-const { ethers, provider, devWallet, borrowerWallet, POOL_ABI, ERC20_ABI, addr, U, fmt } = require('../scripts/lib');
+const { ethers, provider, devWallet, borrowerWallet, POOL_ABI, ERC20_ABI, addr, U, fmt, rpcError, gasHeadroom } = require('../scripts/lib');
 
 const app = express();
 app.use(express.json());
@@ -20,7 +20,7 @@ app.get('/api/state', async (req, res) => {
     const note = new ethers.Contract(addr.cldt01(), ERC20_ABI, provider);
     const borrower = borrowerWallet();
 
-    const [l, powered, remaining, ap, val, borClusd, poolClusd, poolNote, count] = await Promise.all([
+    const [l, powered, remaining, ap, val, borClusd, poolClusd, poolNote, count, gas] = await Promise.all([
       p.loans(loanId),
       p.isPowered(loanId),
       p.leaseRemaining(loanId),
@@ -30,6 +30,7 @@ app.get('/api/state', async (req, res) => {
       clusd.balanceOf(addr.pool()),
       note.balanceOf(addr.pool()),
       p.loanCount(),
+      gasHeadroom(borrower.address),
     ]);
     res.json({
       loanId,
@@ -54,12 +55,13 @@ app.get('/api/state', async (req, res) => {
         frozen: String(ap?.data?.status) === '2',
       },
       validator: val?.data || val,
-      balances: { borrowerCLUSD: fmt(borClusd), poolCLUSD: fmt(poolClusd), poolCLDT01: fmt(poolNote) },
+      balances: { borrowerCLUSD: fmt(borClusd), poolCLUSD: fmt(poolClusd), poolCLDT01: fmt(poolNote), borrowerMON: gas.balance },
+      gasWarning: gas.low ? `Borrower gas low (${Number(gas.balance).toFixed(3)} MON); Monad reserves ~${Number(gas.reservePerTx).toFixed(3)} MON per tx` : null,
       addresses: { pool: addr.pool(), clusd: addr.clusd(), cldt01: addr.cldt01() },
       now: Math.floor(Date.now() / 1000),
     });
   } catch (e) {
-    res.status(500).json({ error: e.shortMessage || e.message });
+    res.status(500).json({ error: rpcError(e) });
   }
 });
 
@@ -129,7 +131,7 @@ app.get('/api/receipts', async (req, res) => {
       .slice(0, 60);
     res.json(all);
   } catch (e) {
-    res.status(500).json({ error: e.shortMessage || e.message });
+    res.status(500).json({ error: rpcError(e) });
   }
 });
 
@@ -160,7 +162,7 @@ app.post('/api/action', async (req, res) => {
     }
     res.json({ ok: true, ...result });
   } catch (e) {
-    res.status(500).json({ error: e.shortMessage || e.message });
+    res.status(500).json({ error: rpcError(e) });
   }
 });
 
