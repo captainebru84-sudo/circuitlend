@@ -6,7 +6,7 @@ RPC_URL = 'https://testnet-rpc.monad.xyz'
 
 # CircuitLendPool on Monad testnet + this device's loan id
 POOL_ADDRESS = '0x5538b0CF2f97e73cedD6349Ef50E299A95B70DdF'
-LOAN_ID = 1
+LOAN_ID = 3
 
 # Borrower wallet + settlement A-Token (CLUSD) for the CVI probe:
 # the device simulates a 1-unit self-transfer from the borrower; a frozen
