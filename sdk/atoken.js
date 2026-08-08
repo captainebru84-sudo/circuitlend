@@ -22,13 +22,18 @@ async function queryApplyStatus(requestId) {
 }
 
 // Sandbox approval is near-instant (~4s); poll until ISSUED or timeout.
+// Transient network failures are retried, not fatal.
 async function waitForIssued(requestId, { timeoutMs = 120000, intervalMs = 4000 } = {}) {
   const deadline = Date.now() + timeoutMs;
   let last;
   while (Date.now() < deadline) {
-    last = await queryApplyStatus(requestId);
-    const status = last?.data?.status || last?.data?.apply_status;
-    if (String(status).toUpperCase().includes('ISSUED')) return last;
+    try {
+      last = await queryApplyStatus(requestId);
+      const status = last?.data?.applyStatus || last?.data?.status;
+      if (String(status).toUpperCase().includes('ISSUED')) return last;
+    } catch (e) {
+      console.log('  status poll retry:', e.cause?.code || e.message);
+    }
     await sleep(intervalMs);
   }
   throw new Error(`A-Token ${requestId} not ISSUED within ${timeoutMs}ms: ${JSON.stringify(last)}`);

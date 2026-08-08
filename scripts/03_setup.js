@@ -20,6 +20,7 @@ const { ethers, devWallet, borrowerWallet, ERC20_ABI, MINTER_ROLE, addr, U, fmt,
 
   // A-Passes first — mints/transfers revert without them
   const expiry = Math.floor(Date.now() / 1000) + 180 * 24 * 3600;
+  let issuedNew = false;
   for (const [label, customerId, address] of [
     ['borrower', 'CIRCUITLENDBORROWER01', borrower.address],
     ['pool', 'CIRCUITLENDPOOLCT01', pool],
@@ -31,11 +32,23 @@ const { ethers, devWallet, borrowerWallet, ERC20_ABI, MINTER_ROLE, addr, U, fmt,
     }
     const res = await apass.generate({
       customerId, address, chain: 'monad', expirationTime: expiry,
-      identityDataList: [{ type: 'COUNTRY', value: 'NG' }],
+      identityDataList: [{
+        idType: 'ID_CARD',
+        fullName: `CircuitLend Demo ${label}`,
+        idNumber: 'CL' + Date.now(),
+        validUntil: '2030-12-31',
+        issuingCountryISO2: 'NG',
+      }],
     });
     console.log(`A-Pass ${label}:`, JSON.stringify(res?.data || res));
+    if (res?.code !== '0000') throw new Error(`A-Pass generation failed for ${label}`);
+    issuedNew = true;
     writeReceipt(`APASS_ISSUED_${label.toUpperCase()}`, { address, customerId, response: res });
     await sleep(4000);
+  }
+  if (issuedNew) {
+    console.log('waiting 15s for on-chain A-Pass registration...');
+    await sleep(15000);
   }
 
   // MINTER_ROLE on CLUSD (dev already holds it on CLDT01 from issuance admin)

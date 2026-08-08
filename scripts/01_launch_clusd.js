@@ -17,13 +17,13 @@ const { devWallet, writeReceipt } = require('./lib');
     rule: { min_tier: 30 },
   });
   console.log('launch response:', JSON.stringify(res, null, 2));
-  const requestId = res?.data?.request_id || res?.data?.requestId;
+  const requestId = res?.data?.requestId || res?.data?.request_id;
   if (!requestId) throw new Error('no request id in launch response');
 
   const issued = await atoken.waitForIssued(requestId);
   console.log('ISSUED:', JSON.stringify(issued, null, 2));
   const d = issued.data || {};
-  const address = d.contract_address || d.token_address || d.address || null;
+  const address = d.atokenAddress || d.contract_address || d.address || null;
   writeReceipt('CLUSD_LAUNCHED', { requestId, launch: res, issued });
   console.log('\nCLUSD address:', address);
   console.log('-> set CLUSD_ADDRESS in .env, then deploy the pool:');
