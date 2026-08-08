@@ -1,0 +1,12 @@
+{
+  "name": "circuitlend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Hardware-enforced RWA lending on Monad — CVI revocation triggers physical enforcement",
+  "type": "commonjs",
+  "workspaces": [],
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ethers": "^6.17.0"
+  }
+}

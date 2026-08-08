@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.*
+!.env.example
+devwallet.json
+borrower.json
+*.key
+cache/
+artifacts/
+typechain-types/
+coverage/
+dist/
+.next/
+.vercel/
+__pycache__/
+*.pyc
