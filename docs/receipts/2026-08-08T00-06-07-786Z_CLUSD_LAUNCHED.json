@@ -1,0 +1,15 @@
+{
+  "action": "CLUSD_LAUNCHED",
+  "at": "2026-08-08T00:06:07.801Z",
+  "chain": "monad-testnet",
+  "requestId": "IA20260808080221700401",
+  "issueAssetId": 296,
+  "atokenAddress": "0x09A050Eb813ddb0b1EEAE7bca83bc1becD04FA31",
+  "txHash": "0x6dec5b444b908ff795d24f406e0f303bf55f44a6f788e92a124313e8b41a0fc7",
+  "tokenSymbol": "CLUSD",
+  "issuedAt": "2026-08-08 08:02:22 (+08:00)",
+  "rule": {
+    "min_tier": 30
+  },
+  "admin": "0x5Aeb0AaDC2C7DA1aA40AF025e163EbC26f890a07"
+}

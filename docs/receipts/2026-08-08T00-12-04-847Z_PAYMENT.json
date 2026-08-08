@@ -1,0 +1,10 @@
+{
+  "action": "PAYMENT",
+  "at": "2026-08-08T00:12:04.847Z",
+  "chain": "monad-testnet",
+  "loanId": 1,
+  "amount": 10,
+  "txHash": "0xe12e497f5ccd44fdb3ba6116672e513c1143de07c5a6094105ef0612547de51a",
+  "outstanding": "90.0",
+  "newLeaseExpiry": "2026-08-08T00:15:52.000Z"
+}

@@ -1,0 +1,23 @@
+{
+  "action": "ENFORCED_CVI_REVOCATION",
+  "at": "2026-08-08T00:12:22.855Z",
+  "chain": "monad-testnet",
+  "loanId": 1,
+  "reason": "Regulator sanction demo - payments fully current",
+  "borrower": "0x2e2BA14F6784B72fE9874b41811193B5B0bdd0cA",
+  "apassFrozenConfirmed": true,
+  "apassState": {
+    "subTier": 0,
+    "tier": "50",
+    "expirationTime": 1801699801,
+    "subGroup": "",
+    "cvRecordId": "1258",
+    "countries": [
+      "NG"
+    ],
+    "currentKycHash": "0x8e3ed447f8827263707d6e0ccad08a756df2f622f0b9de5d7e6c5f1aa7835f4e",
+    "group": "",
+    "status": 2
+  },
+  "enforceTxHash": "0xb0d747c41e142cefd99ac56c06588bfa5b72656cbf1054f0a9bd6857cf594368"
+}

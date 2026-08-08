@@ -1,0 +1,8 @@
+{
+  "action": "ACTORS_READY",
+  "at": "2026-08-08T00:10:46.354Z",
+  "chain": "monad-testnet",
+  "lender": "0x5Aeb0AaDC2C7DA1aA40AF025e163EbC26f890a07",
+  "borrower": "0x2e2BA14F6784B72fE9874b41811193B5B0bdd0cA",
+  "pool": "0x5538b0CF2f97e73cedD6349Ef50E299A95B70DdF"
+}

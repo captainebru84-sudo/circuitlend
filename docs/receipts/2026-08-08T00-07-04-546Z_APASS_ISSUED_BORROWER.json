@@ -1,0 +1,13 @@
+{
+  "action": "APASS_ISSUED_BORROWER",
+  "at": "2026-08-08T00:07:04.548Z",
+  "chain": "monad-testnet",
+  "address": "0x2e2BA14F6784B72fE9874b41811193B5B0bdd0cA",
+  "customerId": "CIRCUITLENDBORROWER01",
+  "response": {
+    "timestamp": "2026-08-08T00:07:04.234+00:00",
+    "status": 500,
+    "error": "Internal Server Error",
+    "path": "/api/cooperate/generate_apass"
+  }
+}

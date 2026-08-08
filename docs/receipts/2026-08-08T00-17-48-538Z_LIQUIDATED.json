@@ -1,0 +1,8 @@
+{
+  "action": "LIQUIDATED",
+  "at": "2026-08-08T00:17:48.538Z",
+  "chain": "monad-testnet",
+  "loanId": 1,
+  "txHash": "0x73a041b805ff50b4157e3197d74587a2e364f4b8cff58a1a0a964ec337e09d15",
+  "collateral": "1.0"
+}

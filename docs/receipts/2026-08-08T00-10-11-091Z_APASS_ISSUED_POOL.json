@@ -1,0 +1,27 @@
+{
+  "action": "APASS_ISSUED_POOL",
+  "at": "2026-08-08T00:10:11.091Z",
+  "chain": "monad-testnet",
+  "address": "0x5538b0CF2f97e73cedD6349Ef50E299A95B70DdF",
+  "customerId": "CIRCUITLENDPOOLCT01",
+  "response": {
+    "code": "0000",
+    "message": "success",
+    "data": {
+      "customerId": "CIRCUITLENDPOOLCT01",
+      "cvRecordId": "1259",
+      "tier": "50",
+      "wallet": {
+        "operate": "insert",
+        "address": "0x5538b0CF2f97e73cedD6349Ef50E299A95B70DdF",
+        "chain": "monad",
+        "txHash": "0x7a2d08db3bc80e5c0f98e7cc93cbb41ba5623f9bfac375d3e265754ec45f31e6",
+        "depositUSDCWallet": "0x993e51D64Ca6484880146aE29ae232fe1833b189",
+        "depositUSDCAccount": "",
+        "depositUSDTWallet": "0x993e51D64Ca6484880146aE29ae232fe1833b189",
+        "depositUSDTAccount": "",
+        "apassAddress": ""
+      }
+    }
+  }
+}

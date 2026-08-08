@@ -1,0 +1,7 @@
+{
+  "action": "ENFORCED_LEASE_DEFAULT",
+  "at": "2026-08-08T00:17:46.610Z",
+  "chain": "monad-testnet",
+  "loanId": 1,
+  "txHash": "0x93b3ec7f9e251c90ca67ce88f14af98c3b3e9ead7c9618969ba315ab0cd6230c"
+}

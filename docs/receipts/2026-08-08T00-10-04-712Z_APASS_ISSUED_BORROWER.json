@@ -1,0 +1,27 @@
+{
+  "action": "APASS_ISSUED_BORROWER",
+  "at": "2026-08-08T00:10:04.715Z",
+  "chain": "monad-testnet",
+  "address": "0x2e2BA14F6784B72fE9874b41811193B5B0bdd0cA",
+  "customerId": "CIRCUITLENDBORROWER01",
+  "response": {
+    "code": "0000",
+    "message": "success",
+    "data": {
+      "customerId": "CIRCUITLENDBORROWER01",
+      "cvRecordId": "1258",
+      "tier": "50",
+      "wallet": {
+        "operate": "insert",
+        "address": "0x2e2BA14F6784B72fE9874b41811193B5B0bdd0cA",
+        "chain": "monad",
+        "txHash": "0x6bec0c218b3ae259021aac9d3c0fcb439165d85bee9fe87d3b58e1ed112d5131",
+        "depositUSDCWallet": "0xC5D01F535C568aB7c7daa61eDd524c996ee182A7",
+        "depositUSDCAccount": "",
+        "depositUSDTWallet": "0xC5D01F535C568aB7c7daa61eDd524c996ee182A7",
+        "depositUSDTAccount": "",
+        "apassAddress": ""
+      }
+    }
+  }
+}

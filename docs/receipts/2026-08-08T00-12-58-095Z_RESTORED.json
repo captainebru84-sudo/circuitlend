@@ -1,0 +1,10 @@
+{
+  "action": "RESTORED",
+  "at": "2026-08-08T00:12:58.098Z",
+  "chain": "monad-testnet",
+  "loanId": 1,
+  "borrower": "0x2e2BA14F6784B72fE9874b41811193B5B0bdd0cA",
+  "apassActiveConfirmed": true,
+  "restoreTxHash": "0x6b3de52b146e5a5aaa446e24fc44c76ff8a2973bbd90a7f794a41d67394e28f4",
+  "leaseSecondsGranted": 30
+}

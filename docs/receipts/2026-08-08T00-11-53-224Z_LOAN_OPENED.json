@@ -1,0 +1,13 @@
+{
+  "action": "LOAN_OPENED",
+  "at": "2026-08-08T00:11:53.225Z",
+  "chain": "monad-testnet",
+  "loanId": 1,
+  "txHash": "0x907af8a37773731e55add6818a417aafcbb6797a37a5caee69f6315ce9f7ee67",
+  "borrower": "0x2e2BA14F6784B72fE9874b41811193B5B0bdd0cA",
+  "principal": "100.0",
+  "installment": "10.0",
+  "leaseSeconds": 120,
+  "graceSeconds": 60,
+  "leaseExpiry": "2026-08-08T00:13:52.000Z"
+}

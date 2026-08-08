@@ -1,0 +1,33 @@
+{
+  "action": "POOL_REGISTERED_VALIDATOR",
+  "at": "2026-08-08T00:11:28.143Z",
+  "chain": "monad-testnet",
+  "pool": "0x5538b0CF2f97e73cedD6349Ef50E299A95B70DdF",
+  "rule": {
+    "allowed_group": "",
+    "allowed_sub_group": "",
+    "min_tier": 30,
+    "min_sub_tier": 0,
+    "is_black_list": false,
+    "countries": []
+  },
+  "register": {
+    "code": "0000",
+    "message": "success",
+    "data": {
+      "chain": "monad",
+      "contract_address": "0x5538b0cf2f97e73cedd6349ef50e299a95b70ddf",
+      "tx_hash": "0xb2cdfef57f537c6985d84165868830c75ab533d1b857eeb5c1381888f8e15a56"
+    }
+  },
+  "verifyLender": {
+    "code": "0000",
+    "message": "success",
+    "data": {
+      "chain": "monad",
+      "valid": true,
+      "contract_address": "0x5538b0cf2f97e73cedd6349ef50e299a95b70ddf",
+      "user_address": "0x5aeb0aadc2c7da1aa40af025e163ebc26f890a07"
+    }
+  }
+}
