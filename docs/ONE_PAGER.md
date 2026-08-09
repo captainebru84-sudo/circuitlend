@@ -34,7 +34,7 @@ Both primitives are load-bearing from the issuance stage, not bolted on at onboa
 | **Validator Compliance (CCP)** | The pool contract is registered with the APass Compliance Validator; pool policy (min tier, groups, countries) is live-editable by the lender. | Pool `0x5538b0CF2f97e73cedD6349Ef50E299A95B70DdF`, `min_tier 30` |
 | **Compliance receipts** | Every state change emits an on-chain `ComplianceReceipt` plus an audit-ready JSON pairing tx hashes with A-Pass record IDs. | `docs/receipts/` |
 
-The pool contract **holds its own A-Pass** — it custodies A-Tokens, so it must be compliant itself. Compliance is enforced at the token contract, not in our application code: a frozen borrower cannot repay, receive funds, or move collateral, and our own scripts revert exactly like a third party's would.
+The pool contract **holds its own A-Pass** — it custodies A-Tokens, so it must be compliant itself. Compliance is enforced at the token contract, not in our application code: a frozen borrower cannot repay, receive funds, or move collateral, and our own scripts revert exactly like a third party's would. Resolution requires the credentialing authority to unfreeze the A-Pass; only then can the borrower repay and restore power. This is intentional: a compliance freeze signals a regulatory event, not a payment dispute, and the cure path runs through compliance — not around it.
 
 ## Why hardware enforcement changes the credit maths
 
@@ -55,6 +55,10 @@ The prize is not liquidation, it is **cure**: a borrower who can restore power b
 A determined borrower can bypass a relay with a screwdriver. We do not claim tamper-proof hardware. Pay-as-you-go lenders such as M-KOPA have financed solar and smartphone hardware at scale in East Africa on exactly this lock-out mechanic — tamper risk is **priced, not fatal**, because bypassing forfeits warranty, servicing, and future credit. What CircuitLend adds on top is the compliance-grade audit trail and regulator-reachable kill-switch those systems lack.
 
 Hardening (potted enclosure, tamper-detect switch latching enforcement on-chain) is a manufacturing problem, not a protocol one, and was deliberately out of scope for a 48-hour build.
+
+## Scalability note
+
+Each device issues a single read-only `eth_call` (~300 bytes over TLS) every ~10 seconds — no gas, no signature. At 10,000 devices that is ~1,000 reads/second, well within Monad's parallel-execution architecture. Fleet deployments route through enterprise RPC providers (Alchemy, QuickNode) with dedicated capacity, or the lender operates a thin archive node. The migration path to event-driven firmware (subscribing to on-chain state changes rather than polling) cuts baseline traffic by 10–100x with a firmware update.
 
 ## Go to market
 
